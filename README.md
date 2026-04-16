@@ -65,3 +65,63 @@ Import `postman/rebase-auth.postman_collection.json` and run requests in order:
 4. Refresh
 5. Logout
 
+## cURL Quickstart
+
+Set base URL (default port in this project is `9000`):
+
+```bash
+BASE_URL="http://localhost:9000"
+```
+
+Register user:
+
+```bash
+curl -X POST "$BASE_URL/api/v1/auth/register" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "alice",
+    "email": "alice@example.com",
+    "password": "strongPassword123"
+  }'
+```
+
+Login (copy `accessToken` and `refreshToken` from response `data`):
+
+```bash
+curl -X POST "$BASE_URL/api/v1/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "alice",
+    "password": "strongPassword123"
+  }'
+```
+
+Use tokens in shell variables:
+
+```bash
+ACCESS_TOKEN="<paste_access_token_here>"
+REFRESH_TOKEN="<paste_refresh_token_here>"
+```
+
+Get current user:
+
+```bash
+curl -X GET "$BASE_URL/api/v1/auth/me" \
+  -H "Authorization: Bearer $ACCESS_TOKEN"
+```
+
+Refresh access token:
+
+```bash
+curl -X POST "$BASE_URL/api/v1/auth/refresh" \
+  -H "Content-Type: application/json" \
+  -d "{\"refreshToken\":\"$REFRESH_TOKEN\"}"
+```
+
+Logout current session:
+
+```bash
+curl -X POST "$BASE_URL/api/v1/auth/logout" \
+  -H "Authorization: Bearer $ACCESS_TOKEN"
+```
+
