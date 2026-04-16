@@ -1,0 +1,56 @@
+# Rebase Auth API
+
+JWT-based authentication with persisted DB sessions using Spring Security (without implementing `UserDetails`).
+
+## Endpoints
+
+- `POST /api/v1/auth/register`
+- `POST /api/v1/auth/login`
+- `GET /api/v1/auth/me` (Bearer token required)
+- `POST /api/v1/auth/logout` (Bearer token required)
+
+## Request/Response
+
+### Register
+
+```json
+{
+  "username": "alice",
+  "email": "alice@example.com",
+  "password": "strongPassword123"
+}
+```
+
+### Login
+
+```json
+{
+  "username": "alice",
+  "password": "strongPassword123"
+}
+```
+
+Login returns `accessToken`, `refreshToken`, and persisted `sessionId`.
+
+## Configuration
+
+`src/main/resources/application.properties` includes:
+
+- `security.jwt.secret`
+- `security.jwt.access-token-expiry-ms`
+- `security.session.expiry-hours`
+
+Set a strong production JWT secret (32+ chars).
+
+## Run
+
+```bash
+./mvnw spring-boot:run
+```
+
+## Test
+
+```bash
+./mvnw -Dtest=JwtServiceTest test
+```
+
