@@ -5,16 +5,17 @@ import com.avijeet.rebase.entities.User;
 import com.avijeet.rebase.exceptions.InvalidTokenException;
 import com.avijeet.rebase.repository.SessionRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class SessionService {
     private final SessionRepository sessionRepository;
     private final TokenService tokenService;
@@ -35,15 +36,31 @@ public class SessionService {
                 .active(true)
                 .build();
 
-        return sessionRepository.save(session);
+        Session savedSession = sessionRepository.save(session);
+        log.info("Created session sessionId={} userId={} ip={}", savedSession.getId(), user.getId(), ipAddress);
+        return savedSession;
     }
 
     @Transactional(readOnly = true)
-    public Session getActiveSession(UUID sessionId) {
+    public Session getActiveSession(Long sessionId) {
         Session session = sessionRepository.findByIdAndActiveTrue(sessionId)
                 .orElseThrow(() -> new InvalidTokenException("Session does not exist or is inactive"));
 
         if (session.isExpired()) {
+            log.warn("Session expired sessionId={}", sessionId);
+            throw new InvalidTokenException("Session has expired");
+        }
+
+        return session;
+    }
+
+    @Transactional(readOnly = true)
+    public Session getActiveSessionByRefreshToken(String refreshToken) {
+        Session session = sessionRepository.findByRefreshTokenAndActiveTrue(refreshToken)
+                .orElseThrow(() -> new InvalidTokenException("Refresh token is invalid"));
+
+        if (session.isExpired()) {
+            log.warn("Session expired during refresh sessionId={}", session.getId());
             throw new InvalidTokenException("Session has expired");
         }
 
@@ -59,13 +76,15 @@ public class SessionService {
 
         activeSessions.forEach(session -> session.setActive(false));
         sessionRepository.saveAll(activeSessions);
+        log.info("Invalidated {} active session(s) for userId={}", activeSessions.size(), user.getId());
     }
 
     @Transactional
-    public void revokeSession(UUID sessionId) {
+    public void revokeSession(Long sessionId) {
         sessionRepository.findByIdAndActiveTrue(sessionId).ifPresent(session -> {
             session.setActive(false);
             sessionRepository.save(session);
+            log.info("Revoked session sessionId={} userId={}", sessionId, session.getUser().getId());
         });
     }
 }
