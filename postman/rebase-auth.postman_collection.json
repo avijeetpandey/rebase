@@ -1,0 +1,128 @@
+{
+  "info": {
+    "_postman_id": "4f1e2fcc-03fe-4f72-a01e-5fbf8aeecf09",
+    "name": "Rebase Auth API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "username", "value": "alice" },
+    { "key": "email", "value": "alice@example.com" },
+    { "key": "password", "value": "StrongPassword123" },
+    { "key": "accessToken", "value": "" },
+    { "key": "refreshToken", "value": "" },
+    { "key": "sessionId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Register",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"{{username}}\",\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}"
+        },
+        "url": "{{baseUrl}}/api/v1/auth/register"
+      },
+      "response": []
+    },
+    {
+      "name": "Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\"\n}"
+        },
+        "url": "{{baseUrl}}/api/v1/auth/login"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('login status is 200', function () { pm.response.to.have.status(200); });",
+              "const payload = pm.response.json();",
+              "const data = payload.data || {};",
+              "pm.collectionVariables.set('accessToken', data.accessToken || '');",
+              "pm.collectionVariables.set('refreshToken', data.refreshToken || '');",
+              "pm.collectionVariables.set('sessionId', String(data.sessionId || ''));"
+            ]
+          }
+        }
+      ],
+      "response": []
+    },
+    {
+      "name": "Me",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+        ],
+        "url": "{{baseUrl}}/api/v1/auth/me"
+      },
+      "response": []
+    },
+    {
+      "name": "Refresh",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+        },
+        "url": "{{baseUrl}}/api/v1/auth/refresh"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('refresh status is 200', function () { pm.response.to.have.status(200); });",
+              "const payload = pm.response.json();",
+              "const data = payload.data || {};",
+              "if (data.accessToken) { pm.collectionVariables.set('accessToken', data.accessToken); }"
+            ]
+          }
+        }
+      ],
+      "response": []
+    },
+    {
+      "name": "Logout",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+        ],
+        "url": "{{baseUrl}}/api/v1/auth/logout"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('logout status is 200', function () { pm.response.to.have.status(200); });",
+              "pm.collectionVariables.unset('accessToken');"
+            ]
+          }
+        }
+      ],
+      "response": []
+    }
+  ]
+}
+
