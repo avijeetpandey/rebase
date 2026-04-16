@@ -1,27 +1,40 @@
 package com.avijeet.rebase.service.auth;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
-import java.security.Key;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.Date;
 import java.util.Map;
 import java.util.function.Function;
 
 @Service
 public class JwtService {
-    private static final String SECRET = "rebaseauthsecret";
-    private final long ACCESS_TOKEN_EXPIRY = 1000 * 60 * 15;
+    private final SecretKey signingKey;
+    private final long accessTokenExpiryMs;
+
+    public JwtService(
+            @Value("${security.jwt.secret}") String secret,
+            @Value("${security.jwt.access-token-expiry-ms:900000}") long accessTokenExpiryMs
+    ) {
+        this.signingKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        this.accessTokenExpiryMs = accessTokenExpiryMs;
+    }
 
     public String generateAccessToken(String username, String sessionId) {
-        return Jwts.builder().claims(Map.of("sid", sessionId)).subject(username)
-                .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRY))
-                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+        Instant now = Instant.now();
+        return Jwts.builder()
+                .claims(Map.of("sid", sessionId))
+                .subject(username)
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(now.plusMillis(accessTokenExpiryMs)))
+                .signWith(signingKey)
                 .compact();
     }
 
@@ -33,16 +46,28 @@ public class JwtService {
         return extractClaim(token, Claims::getSubject);
     }
 
+    public boolean isTokenValid(String token, String username) {
+        try {
+            String extractedUsername = extractUsername(token);
+            return extractedUsername != null
+                    && extractedUsername.equals(username)
+                    && !isTokenExpired(token);
+        } catch (JwtException | IllegalArgumentException ex) {
+            return false;
+        }
+    }
+
+    private boolean isTokenExpired(String token) {
+        Date expiration = extractClaim(token, Claims::getExpiration);
+        return expiration.before(new Date());
+    }
+
     private <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = Jwts.parser()
-                .verifyWith((SecretKey) getSignInKey())
+                .verifyWith(signingKey)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
         return claimsResolver.apply(claims);
-    }
-
-    private Key getSignInKey() {
-        return Keys.hmacShaKeyFor(SECRET.getBytes());
     }
 }
