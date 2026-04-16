@@ -6,6 +6,7 @@ JWT-based authentication with persisted DB sessions using Spring Security (witho
 
 - `POST /api/v1/auth/register`
 - `POST /api/v1/auth/login`
+- `POST /api/v1/auth/refresh`
 - `GET /api/v1/auth/me` (Bearer token required)
 - `POST /api/v1/auth/logout` (Bearer token required)
 
@@ -53,4 +54,14 @@ Set a strong production JWT secret (32+ chars).
 ```bash
 ./mvnw -Dtest=JwtServiceTest test
 ```
+
+## Postman
+
+Import `postman/rebase-auth.postman_collection.json` and run requests in order:
+
+1. Register
+2. Login
+3. Me
+4. Refresh
+5. Logout
 
