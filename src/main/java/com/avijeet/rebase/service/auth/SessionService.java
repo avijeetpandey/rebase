@@ -3,7 +3,7 @@ package com.avijeet.rebase.service.auth;
 import com.avijeet.rebase.entities.Session;
 import com.avijeet.rebase.entities.User;
 import com.avijeet.rebase.exceptions.InvalidTokenException;
-import com.avijeet.rebase.repository.SessionRepository;
+import com.avijeet.rebase.repository.auth.SessionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

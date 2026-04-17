@@ -1,16 +1,18 @@
 package com.avijeet.rebase.service.auth;
 
-import com.avijeet.rebase.dto.AuthResponse;
-import com.avijeet.rebase.dto.LoginRequest;
-import com.avijeet.rebase.dto.RefreshTokenRequest;
-import com.avijeet.rebase.dto.RegisterRequest;
-import com.avijeet.rebase.dto.UserProfileResponse;
+import com.avijeet.rebase.dto.auth.AuthResponse;
+import com.avijeet.rebase.dto.auth.LoginRequest;
+import com.avijeet.rebase.dto.auth.RefreshTokenRequest;
+import com.avijeet.rebase.dto.auth.RegisterRequest;
+import com.avijeet.rebase.dto.profile.UserProfileResponse;
 import com.avijeet.rebase.entities.Session;
 import com.avijeet.rebase.entities.User;
 import com.avijeet.rebase.exceptions.AuthenticationFailedException;
 import com.avijeet.rebase.exceptions.UserAlreadyExisitsException;
 import com.avijeet.rebase.exceptions.UserNotFoundException;
-import com.avijeet.rebase.repository.UserRepository;
+import com.avijeet.rebase.entities.UserProfile;
+import com.avijeet.rebase.repository.profile.UserProfileRepository;
+import com.avijeet.rebase.repository.user.UserRepository;
 import com.avijeet.rebase.utils.mapper.AuthObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +30,7 @@ public class AuthService {
     private final SessionService sessionService;
     private final JwtService jwtService;
     private final AuthObjectMapper authObjectMapper;
+    private final UserProfileRepository userProfileRepository;
 
     @Transactional
     public UserProfileResponse register(RegisterRequest request) {
@@ -48,6 +51,10 @@ public class AuthService {
                 .build());
 
         log.info("Registered user userId={} username={}", savedUser.getId(), savedUser.getUsername());
+
+        UserProfile profile = new UserProfile();
+        profile.setUser(savedUser);
+        userProfileRepository.save(profile);
 
         return authObjectMapper.toUserProfile(savedUser);
     }
