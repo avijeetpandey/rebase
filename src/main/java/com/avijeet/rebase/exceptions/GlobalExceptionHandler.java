@@ -1,6 +1,6 @@
 package com.avijeet.rebase.exceptions;
 
-import com.avijeet.rebase.dto.ErrorResponse;
+import com.avijeet.rebase.dto.api.ErrorResponse;
 import com.avijeet.rebase.utils.api.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
