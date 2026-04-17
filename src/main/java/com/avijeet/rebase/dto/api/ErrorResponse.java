@@ -1,4 +1,4 @@
-package com.avijeet.rebase.dto;
+package com.avijeet.rebase.dto.api;
 
 import java.time.LocalDateTime;
 

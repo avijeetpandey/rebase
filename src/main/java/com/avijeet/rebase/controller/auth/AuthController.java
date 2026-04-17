@@ -1,11 +1,11 @@
-package com.avijeet.rebase.controller;
+package com.avijeet.rebase.controller.auth;
 
-import com.avijeet.rebase.config.AuthenticatedUser;
-import com.avijeet.rebase.dto.AuthResponse;
-import com.avijeet.rebase.dto.LoginRequest;
-import com.avijeet.rebase.dto.RefreshTokenRequest;
-import com.avijeet.rebase.dto.RegisterRequest;
-import com.avijeet.rebase.dto.UserProfileResponse;
+import com.avijeet.rebase.config.auth.AuthenticatedUser;
+import com.avijeet.rebase.dto.auth.AuthResponse;
+import com.avijeet.rebase.dto.auth.LoginRequest;
+import com.avijeet.rebase.dto.auth.RefreshTokenRequest;
+import com.avijeet.rebase.dto.auth.RegisterRequest;
+import com.avijeet.rebase.dto.profile.UserProfileResponse;
 import com.avijeet.rebase.service.auth.AuthService;
 import com.avijeet.rebase.utils.api.ApiResponse;
 import com.avijeet.rebase.utils.constants.ApiConstants;

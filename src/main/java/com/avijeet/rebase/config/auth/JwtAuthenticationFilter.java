@@ -1,4 +1,4 @@
-package com.avijeet.rebase.config;
+package com.avijeet.rebase.config.auth;
 
 import com.avijeet.rebase.entities.Session;
 import com.avijeet.rebase.exceptions.InvalidTokenException;

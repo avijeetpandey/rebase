@@ -1,4 +1,6 @@
-package com.avijeet.rebase.dto;
+package com.avijeet.rebase.dto.auth;
+
+import com.avijeet.rebase.dto.profile.UserProfileResponse;
 
 import java.time.LocalDateTime;
 

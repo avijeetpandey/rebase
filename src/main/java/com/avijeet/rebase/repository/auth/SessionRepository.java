@@ -1,4 +1,4 @@
-package com.avijeet.rebase.repository;
+package com.avijeet.rebase.repository.auth;
 
 import com.avijeet.rebase.entities.Session;
 import com.avijeet.rebase.entities.User;

@@ -1,4 +1,4 @@
-package com.avijeet.rebase.repository;
+package com.avijeet.rebase.repository.user;
 
 import com.avijeet.rebase.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;

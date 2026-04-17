@@ -41,6 +41,9 @@ public class User {
     @Column
     private LocalDateTime updatedAt;
 
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, optional = true)
+    private UserProfile profile;
+
     @PrePersist
     public void onCreate() {
         LocalDateTime now = LocalDateTime.now();
