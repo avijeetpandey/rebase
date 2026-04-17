@@ -7,6 +7,18 @@ Backend for Rebase built with Spring Boot + Spring Security (JWT auth + persiste
 - Local: `http://localhost:9000`
 - API prefix: `/api/v1`
 
+## Swagger / OpenAPI
+
+- OpenAPI JSON: `http://localhost:9000/v3/api-docs`
+- Swagger UI: `http://localhost:9000/swagger-ui.html`
+
+How to use auth in Swagger UI:
+
+1. Call `POST /api/v1/auth/login` from Swagger and copy `data.accessToken`.
+2. Click **Authorize** in Swagger UI.
+3. Paste `Bearer <accessToken>` in the `bearerAuth` field.
+4. Call secured APIs (`/api/v1/posts`, `/api/v1/profiles`, `/api/v1/auth/me`, etc.).
+
 ## Standard API Envelope
 
 All endpoints return this wrapper:

@@ -10,6 +10,10 @@ import com.avijeet.rebase.service.auth.AuthService;
 import com.avijeet.rebase.utils.api.ApiResponse;
 import com.avijeet.rebase.utils.constants.ApiConstants;
 import com.avijeet.rebase.utils.http.RequestContextUtils;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,11 +31,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(ApiConstants.AUTH_BASE_URL)
 @RequiredArgsConstructor
 @Slf4j
+@Tag(name = "Auth", description = "Authentication and session lifecycle APIs")
 public class AuthController {
 
     private final AuthService authService;
 
     @PostMapping("/register")
+    @Operation(summary = "Register user", description = "Creates a new user and corresponding profile")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "User registered"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Validation failure"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "User already exists")
+    })
     public ResponseEntity<ApiResponse<UserProfileResponse>> register(@Valid @RequestBody RegisterRequest request) {
         log.info("Register request received for username={}", request.username());
         UserProfileResponse registeredUser = authService.register(request);
@@ -40,6 +51,11 @@ public class AuthController {
     }
 
     @PostMapping("/login")
+    @Operation(summary = "Login", description = "Authenticates a user and creates a persisted session")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Login successful"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Invalid credentials")
+    })
     public ResponseEntity<ApiResponse<AuthResponse>> login(
             @Valid @RequestBody LoginRequest request,
             HttpServletRequest httpServletRequest
@@ -57,6 +73,8 @@ public class AuthController {
 
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Current user", description = "Returns currently authenticated user profile")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<ApiResponse<UserProfileResponse>> me(Authentication authentication) {
         AuthenticatedUser principal = (AuthenticatedUser) authentication.getPrincipal();
         log.debug("Fetching profile for username={} sessionId={}", principal.username(), principal.sessionId());
@@ -65,6 +83,11 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
+    @Operation(summary = "Refresh access token", description = "Creates a new access token from refresh token")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Access token refreshed"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Invalid refresh token")
+    })
     public ResponseEntity<ApiResponse<AuthResponse>> refresh(@Valid @RequestBody RefreshTokenRequest request) {
         log.info("Refresh token request received");
         AuthResponse authResponse = authService.refreshAccessToken(request);
@@ -74,6 +97,8 @@ public class AuthController {
 
     @PostMapping("/logout")
     @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Logout", description = "Invalidates active persisted session")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<ApiResponse<Void>> logout(Authentication authentication) {
         AuthenticatedUser principal = (AuthenticatedUser) authentication.getPrincipal();
         log.info("Logout request for username={} sessionId={}", principal.username(), principal.sessionId());
